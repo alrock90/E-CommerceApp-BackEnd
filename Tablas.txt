@@ -1,0 +1,53 @@
+CREATE TABLE products (
+    id          INT PRIMARY KEY,
+    name        VARCHAR(15) NOT NULL,
+    description VARCHAR(30),
+    price       MONEY NOT NULL,
+    brand       VARCHAR(15) NOT NULL,
+    stock       INT NOT NULL
+);
+
+CREATE TABLE cart (
+    id      	INT PRIMARY KEY,
+    user_id		INT, 
+	status    	VARCHAR(15) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+	
+);
+
+CREATE TABLE cart_products (
+    id      	INT PRIMARY KEY,
+    cart_id		INT, 
+	product_id	INT,
+	quantity	INT,
+	status    	VARCHAR(15) NOT NULL,
+    FOREIGN KEY (cart_id) REFERENCES cart(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)	
+);
+
+
+CREATE TABLE users (
+    id      INT PRIMARY KEY,
+    name    VARCHAR(15) NOT NULL,
+    email   VARCHAR(30) NOT NULL,
+    telefon VARCHAR(20) 
+);
+
+
+CREATE TABLE orders (
+    id      	INT PRIMARY KEY,
+    user_id		INT, 
+	total    	money NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)	
+);
+
+CREATE TABLE orders_produtcs (
+    order_id     	INT,
+    product_id		INT, 
+	price    		MONEY NOT NULL,
+	quantity		INT NOT NULL, 
+	PRIMARY KEY (order_id, product_id) 	
+);
+
+
+
