@@ -1,60 +1,9 @@
-/*
-const express = require('express');
-const router = express.Router();
 
-// Ruta: GET /users
-router.get('/', (req, res) => {
-  res.send('Lista de usuarios');
-});
-
-// Ruta: GET /users/:userId
-router.get('/:userId', (req, res) => {
-  const userId = req.params.userId;
-  res.send(`Detalles del usuario con ID ${userId}`);
-}); 
-*/
 const { Router } = require('express');
 const pool = require('../db/queries'); // Importa la instancia del pool desde el módulo queries
 const { models } = require('../models');
 const router = Router();
-/*
-const getUsers = (request, response) => {
-  pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
-    if (error) {
-      throw error;
-    }
-    response.status(200).json(results.rows);
-  });
-};
 
-
-const getUserById = (request, response) => {
-  const id = parseInt(request.params.id);
-
-  pool.query('SELECT * FROM users WHERE id = $1', [id], (error, results) => {
-    if (error) {
-      throw error;
-    }
-    response.status(200).json(results.rows);
-  });
-};
-
-
-const createUser = (request, response) => {
-  const { name, email, telefon } = request.body;
-
-  pool.query(
-    'INSERT INTO users (name, email, telefon) VALUES ($1, $2, $3) RETURNING *',
-    [name, email, telefon],
-    (error, results) => {
-      if (error) {
-        throw error;
-      }
-      response.status(201).send(`User added with ID: ${results.rows[0].id}`);
-    }
-  );
-};
-*/
 
 const getUsers = async (request, response) => {
   try {
@@ -71,6 +20,7 @@ const getUserById = async (request, response) => {
   const id = parseInt(request.params.id);
   const userById = await models.Users.findByPk(id);
   if (userById === null) {
+    response.status(404).send("not found!");
     console.log('Not found!');
   } else {
     response.status(200).json(userById);
@@ -91,31 +41,39 @@ const createUser = async (request, response) => {
   
 };
 
-const updateUser = (request, response) => {
-  const id = parseInt(request.params.id);
-  const { name, email } = request.body;
-
-  pool.query(
-    'UPDATE users SET name = $1, email = $2 WHERE id = $3',
-    [name, email, id],
-    (error, results) => {
-      if (error) {
-        throw error;
+const updateUser = async (request, response) => {
+  const idUpdate = parseInt(request.params.id);
+  const { name, email, telefon } = request.body;
+      console.log(`id to uodate ${idUpdate}`)
+      try {
+        // Actualizar usuarios sin apellido a "Doe"
+        const result = await models.Users.update({ name: name, email: email, telefon: telefon }, {
+          where: {
+            id: idUpdate
+          }
+        });  
+        response.status(200).send(`User modified with ID: ${idUpdate} updatedRows: ${result[0]} `);;
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
       }
-      response.status(200).send(`User modified with ID: ${id}`);
-    }
-  );
 };
 
-const deleteUser = (request, response) => {
+const deleteUser = async (request, response) => {
   const id = parseInt(request.params.id);
-
-  pool.query('DELETE FROM users WHERE id = $1', [id], (error, results) => {
-    if (error) {
-      throw error;
-    }
+  try{
+    // Delete everyone named "Jane"
+    const result = await models.Users.destroy({
+      where: {
+        id: id
+      }
+    });
     response.status(200).send(`User deleted with ID: ${id}`);
-  });
+  } catch(error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+
+  }
 };
 
 router.get('/', getUsers);
