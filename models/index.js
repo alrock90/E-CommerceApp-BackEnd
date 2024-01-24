@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const getUsersModel = require('./users');
 const getOrdersModel = require('./orders');
+const getProductModel = require('./product');
 
 const sequelize = new Sequelize(
   process.env.PGDATABASE,
@@ -14,6 +15,7 @@ const sequelize = new Sequelize(
 const models = {
   Users: getUsersModel(sequelize, Sequelize),
   Orders: getOrdersModel(sequelize, Sequelize),
+  Product: getProductModel(sequelize, Sequelize),
 };
 
 Object.keys(models).forEach((key) => {

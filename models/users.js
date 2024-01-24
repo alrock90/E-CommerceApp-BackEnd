@@ -19,6 +19,13 @@ const getUsersModel = (sequelize, { DataTypes }) => {
     telefon: {
       type: DataTypes.STRING,      
     },
+    password: {
+      type: DataTypes.STRING, 
+      allowNull: false,    
+      validate: {
+        notEmpty: true,
+      }, 
+    },
   });
 
   Users.associate = (models) => {

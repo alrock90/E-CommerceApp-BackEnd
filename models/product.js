@@ -28,5 +28,4 @@ const getProductModel = (sequelize, { DataTypes }) => {
   
     return Product;
   };
-  
-  export default getProductModel;
+  module.exports = getProductModel;

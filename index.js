@@ -1,13 +1,28 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const port = 3000;
+const { SESSION_SECRET } = require('./config');
 require('dotenv').config({ path: 'example.env' });
-
-
 const routes = require('./routes/index'); // Importa las rutas de usuarios desde el directorio routes
 const { sequelize, models } = require('./models');
+const session = require("express-session"); 
+const passport = require("passport");
 
+require("./services/passport");
+
+
+// Session Config
+app.use(
+  session({
+    secret:'SESSION_SECRET',
+    saveUninitialized: false,
+    resave: false,
+    cookie: { maxAge: 172800000, sameSite: "none", secure: true },
+  })
+);
+// Passport Config
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 app.use(bodyParser.json());
@@ -22,6 +37,9 @@ app.get('/', (req, res) => {
 });
 // Montar los enrutadores en las rutas específicas
 app.use('/users', routes.userRouter);
+app.use('/product', routes.productRouter);
+app.use('/order', routes.orderRouter);
+app.use('/', routes.authRouter);
 
 
 sequelize.sync().then(() => {

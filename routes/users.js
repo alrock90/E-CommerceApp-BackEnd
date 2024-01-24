@@ -1,6 +1,5 @@
 
 const { Router } = require('express');
-const pool = require('../db/queries'); // Importa la instancia del pool desde el módulo queries
 const { models } = require('../models');
 const router = Router();
 
@@ -24,10 +23,10 @@ const getUserById = async (request, response) => {
     console.log('Not found!');
   } else {
     response.status(200).json(userById);
-  }
- 
-  
+  }  
 };
+
+
 
 
 const createUser = async (request, response) => {
@@ -83,7 +82,5 @@ router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
 
 
-
-module.exports = router;
 
 module.exports = router;
