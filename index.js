@@ -1,30 +1,41 @@
+require('dotenv').config({ path: 'example.env' });
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const { SESSION_SECRET } = require('./config');
-require('dotenv').config({ path: 'example.env' });
+
 const routes = require('./routes/index'); // Importa las rutas de usuarios desde el directorio routes
 const { sequelize, models } = require('./models');
-const session = require("express-session"); 
+const cors = require('cors');
+const session = require("express-session");
 const passport = require("passport");
 
-require("./services/passport");
+const path = require('path');
 
 
-// Session Config
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Import Passport config
+require("./config/passport");
+
+
+console.log(process.env.SESSION_SECRET );
 app.use(
   session({
-    secret:'SESSION_SECRET',
+    secret: process.env.SESSION_SECRET || 'una_cadena_secreta_y_unica',
     saveUninitialized: false,
     resave: false,
-    cookie: { maxAge: 172800000, sameSite: "none", secure: true },
+    cookie: { maxAge: 172800000 },
   })
 );
+
+
+
 // Passport Config
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+//Bodyparser
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
@@ -33,8 +44,13 @@ app.use(
 );
 
 app.get('/', (req, res) => {
+  console.log(req.session); // Imprime el objeto de sesión
+  console.log(req.user); // Imprime el objeto de sesión
   res.send('¡Bienvenido a la aplicación    !');
 });
+
+
+
 // Montar los enrutadores en las rutas específicas
 app.use('/users', routes.userRouter);
 app.use('/product', routes.productRouter);
@@ -48,33 +64,3 @@ sequelize.sync().then(() => {
     console.log(`Example app listening on port ${process.env.PORT}!`);
   });
 });
-
-/*
-//const userRoutes = require('./routes/users');
-
-app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
-
-// Montar los enrutadores en las rutas específicas
-app.use('/users', routes.userRouter);
-
-
-
-
-
-// Ruta principal
-app.get('/', (req, res) => {
-  res.send('¡Bienvenido a la aplicación!');
-});
-
-
-app.listen(port, () => {
-  console.log(`App running on port ${port}.`);
-});
-
-*/
-// Ruta principal
