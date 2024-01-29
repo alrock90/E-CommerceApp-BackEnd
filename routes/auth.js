@@ -70,8 +70,9 @@ router.post('/login',
   function (req, res) {
     console.log('Estado de autenticación:', req.isAuthenticated());
 
+    res.redirect('/goodlogin');
     // Intenta una redirección manual
-    res.status(302).json({ redirect: '/goodlogin' });
+    //res.status(302).json({ redirect: '/goodlogin' });
   });
 
 
@@ -86,8 +87,8 @@ router.get('/goodlogin', (req, res) => {
 
   console.log("passport user", req.user);
 
-  res.redirect('/badlogin');
-  //res.send("all ok")
+  
+  res.send("all ok")
 });
 
 

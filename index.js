@@ -13,7 +13,6 @@ const path = require('path');
 
 
 
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Import Passport config
 require("./config/passport");
@@ -42,6 +41,10 @@ app.use(
     extended: true,
   })
 );
+
+// Configurar Express para servir archivos estáticos desde la carpeta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.get('/', (req, res) => {
   console.log(req.session); // Imprime el objeto de sesión
