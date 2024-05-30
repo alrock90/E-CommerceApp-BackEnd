@@ -81,15 +81,20 @@ passport.use(
 )); */
 
 
-passport.use(new LocalStrategy(async (username, password, done) => {
+passport.use(new LocalStrategy({
+  usernameField: 'email', // especifica que el campo de usuario es 'email'
+  passwordField: 'password' // campo de contraseña sigue siendo 'password'
+},async (email, password, done) => {
   try {
     console.log("entre")
-    const usuario = await models.Users.findOne({ where: { name: username} });
+    console.log(email)
+    console.log(password)
+    const usuario = await models.Users.findOne({ where: { email: email } });
     console.log(usuario.id)
     if (!usuario) {
       return done(null, false, { message: 'Usuario no encontrado' });
     }
-    
+
     try {
       const match = await bcrypt.compare(password, usuario.password);
       if (match) {
@@ -102,8 +107,8 @@ passport.use(new LocalStrategy(async (username, password, done) => {
       console.error('Error al comparar contraseñas:', error);
       return done(error);
     }
-    
-   
+
+
   } catch (error) {
     return done(error);
   }
@@ -115,17 +120,20 @@ passport.use(new LocalStrategy(async (username, password, done) => {
 // Serialize a user
 
 passport.serializeUser((user, done) => {
+  console.log("entre serializeUser")
   done(null, user.id);
 });
-// Deserialize a user
 
-passport.deserializeUser((id, done) => {
-  models.Users.findByPk(id, function (err, user) {
-    if (err) {
-      return done(err);
-    }
+// Deserialize a user
+passport.deserializeUser(async (id, done) => {
+  try {
+    console.log("entre deserializeUser", id)
+    const user = await models.Users.findByPk(id);
     done(null, user);
-  });
+
+  } catch (err) {
+    return done(err);
+  }
 });
 
 
@@ -154,4 +162,5 @@ passport.deserializeUser((id, done) => {
 
 
 
-module.exports = passport; 
+
+module.exports = passport;

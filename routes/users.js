@@ -29,7 +29,7 @@ const getUserById = async (request, response) => {
 
 
 
-const createUser = async (request, response) => {
+/* const createUser = async (request, response) => {
   const { name, email, telefon } = request.body;
   // Create a new user
   const newuser = await models.Users.create({ name: name, email: email, telefon: telefon });
@@ -38,7 +38,7 @@ const createUser = async (request, response) => {
       response.status(201).send(`User added with ID: ${ JSON.stringify(newuser.id)}`);
     
   
-};
+}; */
 
 const updateUser = async (request, response) => {
   const idUpdate = parseInt(request.params.id);
@@ -75,11 +75,19 @@ const deleteUser = async (request, response) => {
   }
 };
 
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login'); // Redirigir al inicio de sesión si no está autenticado
+}
+
 router.get('/', getUsers);
-router.get('/:id', getUserById);
-router.post('/', createUser);
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.get('/:id',ensureAuthenticated, getUserById);
+//router.post('/', createUser);
+router.put('/:id',ensureAuthenticated, updateUser);
+router.delete('/:id',ensureAuthenticated, deleteUser);
 
 
 

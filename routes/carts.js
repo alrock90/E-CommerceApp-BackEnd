@@ -1,77 +1,148 @@
 
 const { Router } = require('express');
 const { models } = require('../models');
+const passport = require('passport');
 const router = Router();
 
+// Middleware para proteger las rutas con Passport
+const authenticateUser = passport.authenticate('local', { session: false });
 
 const getCart = async (request, response) => {
-
-  const id = parseInt(request.params.id);
+  const user = request.user;
+  //const cartId = parseInt(request.params.id);
+  console.log("userId:", user.id)
+  console.log("cartId:", user.cartId)
   try {
     const cartUser = await models.Cart.findAll({
       where: {
-        userId: id
-      }
+        id: user.cartId
+      },
+      include: [models.Product]
     });
-    response.status(200).json(cartUser);  
-} catch (error) {
+    response.status(200).json(cartUser);
+  } catch (error) {
     console.error("Error getting Cart:", error);
     response.status(500).json({ error: "Internal server error" });
-}
+  }
 };
 
-
-
-
-const createCart = async (request, response) => {
-  // Create a new Cart
-  const newCart = await models.Cart.create({ status: 'open'});
-  console.log("new Cart's auto-generated ID:",  JSON.stringify(newCart.id));
- 
-      response.status(201).send(`Cart created: ${ JSON.stringify(newCart)}`);
-    
-  
-};
 
 const addItem = async (request, response) => {
-  const id = parseInt(request.params.id);
-  const { itemId , quantity, price } = request.body;
-      try {
-        // Actualizar usuarios sin apellido a "Doe"
-        const result = await models.Cart.update({ name: name, email: email, telefon: telefon }, {
-          where: {
-            id: idUpdate
-          }
-        });  
-        response.status(200).send(`Cart modified with ID: ${idUpdate} updatedRows: ${result[0]} `);;
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: 'Internal Server Error' });
-      }
+  console.log("entre a addItem")
+  console.log(request.user)
+  //const cartId = request.user.cartId;
+  const { productId, quantity, cartId } = request.body;
+
+  try {
+    const result = await models.Cart_product.create({ quantity: quantity, productId: productId, cartId: cartId });
+    response.status(200).send(`Cart_product add new  `);;
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
 };
 
-const deleteCart = async (request, response) => {
-  const id = parseInt(request.params.id);
-  try{
-    // Delete everyone named "Jane"
-    const result = await models.Cart.destroy({
+const checkout = async (request, response) => {
+  const cartId = request.user.cartId;
+  const cartToCheckOut = await models.Cart.findAll({
+    where: {
+      id: cartId
+    },
+    include: [models.Product]
+  });
+  const productInCart = cartToCheckOut[0].products;
+
+  //if the cart is empty, go out and not create the order
+  if (!productInCart || productInCart.length === 0) {
+    return response.status(400).json({ success: false, error: 'El carrito está vacío' });
+  }
+
+  //calculate total
+  var total = 0;
+  productInCart.forEach(item => {
+    console.log("item.productId", item.id)
+    const quantity = item.cart_product?.quantity;
+    total += item.price * quantity;
+
+  });
+
+
+  try {
+    //new order
+    const newOrder = await models.Orders.create({ total: total, userId: request.user.id });
+    //copy productos to products_order
+    for (const item of productInCart) {
+      const result = await models.Product_order.create(
+        {
+          quantity: item.cart_product?.quantity,
+          productId: item.id,
+          orderId: newOrder.id
+        }, {
+        where: {
+          cartId: cartId
+        }
+      }
+      );
+    };
+    //delete al items en cart
+    const result = await models.Cart_product.destroy({
       where: {
-        id: id
+        cartId: cartId
       }
     });
-    response.status(200).send(`Cart deleted with ID: ${id}`);
-  } catch(error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
 
+    //send response
+    response.status(200).send(`Order add new  `);;
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+};
+
+const updateItem = async (request, response) => {
+  const cartId = request.user.cartId;
+  const { productId, quantity } = request.body;
+
+  try {
+    const result = await models.Cart_product.update({ quantity: quantity }, {
+      where: {
+        productId: productId,
+        cartId: cartId
+      }
+    });
+    response.status(200).send(`Cart_product updated  `);;
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+};
+
+const deleteItem = async (request, response) => {
+  const cartId = request.user.cartId;
+  const productId = parseInt(request.params.id);
+
+  try {
+    const result = await models.Cart_product.destroy({
+      where: {
+        cartId: cartId,
+        productId: productId
+      }
+    });
+    if (result) response.status(200).send(`Cart_product productId ${productId} deleted `);
+    if (!result) response.status(200).send(`Cart_product productId ${productId} not found `);
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
 
 router.get('/', getCart);
-router.get('/:id', getCartById);
-router.post('/', createCart);
-router.put('/:id', updateCart);
-router.delete('/:id', deleteCart);
+router.post('/checkout', checkout);
+router.post('/', addItem);
+router.put('/', updateItem);
+router.delete('/:id', deleteItem);
+
+
 
 
 

@@ -1,19 +1,26 @@
+
+
 const getCartModel = (sequelize, { DataTypes }) => {
     const Cart = sequelize.define('cart', {
-      status: {
+  /*     status: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
           notEmpty: true,
         },
-      },
+      }, */
     });
-  
+  /*
     Cart.associate = (models) => {
-      Cart.belongsTo(models.User);
+      Cart.hasOne(models.Users);
     };
-  
-    return Message;
+  */
+
+    Cart.associate = (models) => {
+      Cart.hasOne(models.Users, { foreignKey: 'cartId' });
+    };
+    
+    return Cart;
   };
   
-  export default getCartModel;
+  module.exports = getCartModel;

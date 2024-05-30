@@ -11,8 +11,14 @@ const passport = require("passport");
 
 const path = require('path');
 
+// Configuración de CORS
+const corsOptions = {
+  origin: 'http://localhost:3001', // Reemplaza con la URL de tu frontend
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-
+app.use(cors(corsOptions));
 
 // Import Passport config
 require("./config/passport");
@@ -47,8 +53,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/', (req, res) => {
-  console.log(req.session); // Imprime el objeto de sesión
-  console.log(req.user); // Imprime el objeto de sesión
+  //console.log(req.session); // Imprime el objeto de sesión
+
+  const user = req.user ;
+  console.log("userId:",user)
+  console.log(req.userId); // Imprime el objeto de sesión
   res.send('¡Bienvenido a la aplicación    !');
 });
 
@@ -58,7 +67,10 @@ app.get('/', (req, res) => {
 app.use('/users', routes.userRouter);
 app.use('/product', routes.productRouter);
 app.use('/order', routes.orderRouter);
-app.use('/', routes.authRouter);
+app.use('/cart', routes.cartRouter);
+//app.use('/', routes.authRouter);
+app.use('/', routes.authRouter); // Asegúrate de que authRouter esté correctamente definido en tu objeto routes
+
 
 
 sequelize.sync().then(() => {

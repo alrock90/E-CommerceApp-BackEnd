@@ -3,6 +3,7 @@ const userRouter = require('./users');
 const productRouter = require('./products');
 const orderRouter = require('./orders');
 const authRouter = require('./auth');
+const cartRouter = require('./carts');
 
 
 const router = express.Router();
@@ -15,5 +16,6 @@ const router = express.Router();
     userRouter,
     productRouter,
     orderRouter,
-    authRouter
+    authRouter,
+    cartRouter
   }

@@ -1,30 +1,31 @@
-
+const { models } = require('./index');
 
 const getProductsOrdersModel = (sequelize, { DataTypes }) => {
-   
-    const Products_orders = sequelize.define('Products_orders', {
-        selfGranted: DataTypes.BOOLEAN,
-        price: {
-            type: DataTypes.DECIMAL(10, 2), // Precisión de 10 dígitos, 2 decimales
-            allowNull: false,
-          },        
-          
-        quantity: {
-            type: DataTypes.INTEGER, // Precisión de 10 dígitos, 2 decimales
-            allowNull: false,
-          },
-    }, { timestamps: false });
 
-    Products_orders.associate = (models) => {
-        Products_orders.belongsTo(models.users);    
-    };
-    Product.belongsToMany(Orders, { through: Product_order });
-    Orders.belongsToMany(Product, { through: Product_order });
+  const Products_orders = sequelize.define('products_orders', {
+    //selfGranted: DataTypes.BOOLEAN,
+    /* price: {
+      type: DataTypes.DECIMAL(10, 2), // Precisión de 10 dígitos, 2 decimales
+      allowNull: false,
+    }, */
 
-  
-    
-  
-    return Products_orders;
+    quantity: {
+      type: DataTypes.INTEGER, // Precisión de 10 dígitos, 2 decimales
+      allowNull: false,
+    },
+  }, { timestamps: false });
+/*
+  Products_orders.associate = (models) => {
+    //Products_orders.belongsTo(models.Users);
+
+    models.Product.belongsToMany(models.Orders, { through: models.Products_orders });
+    models.Orders.belongsToMany(models.Product, { through: models.Products_orders });
   };
-  
-  export default getProductsOrdersModel;
+*/
+
+
+  return Products_orders;
+};
+
+
+module.exports = getProductsOrdersModel;

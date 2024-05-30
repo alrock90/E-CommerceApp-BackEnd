@@ -17,23 +17,33 @@ const getUsersModel = (sequelize, { DataTypes }) => {
       },
     },
     telefon: {
-      type: DataTypes.STRING,      
+      type: DataTypes.STRING,
     },
     password: {
-      type: DataTypes.STRING, 
-      allowNull: false,    
+      type: DataTypes.STRING,
+      allowNull: false,
       validate: {
         notEmpty: true,
-      }, 
+      },
+    },
+
+    cartId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'carts', // Nombre de la tabla de carritos
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
     },
   });
 
   Users.associate = (models) => {
     Users.hasMany(models.Orders);
-   // Users.belongsTo(models.cart);
+    Users.belongsTo(models.Cart, { foreignKey: 'cartId' }); // Asegúrate de usar el nombre del modelo correcto
   };
 
-  
+
 
   return Users;
 };

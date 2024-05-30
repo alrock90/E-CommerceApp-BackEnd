@@ -5,20 +5,20 @@ const router = Router();
 
 
 const getOrders = async (request, response) => {
-    const actualUserId= parseInt(request.params.id); //request.userId;
+  const actualUserId = request.user.id; //parseInt(request.params.id); //request.userId;
   try {
-    //const allOrders= await models.Orders.findAll({
-     //   where: {
-     //       userId: actualUserId
-     //   }
-    //  });    
+    const allOrders= await models.Orders.findAll({
+       where: {
+           userId: actualUserId
+       }
+      });    
 
-    const allOrders = await models.Orders.findAll();
-    response.status(200).json(allOrders);  
-} catch (error) {
+    //const allOrders = await models.Orders.findAll();
+    response.status(200).json(allOrders);
+  } catch (error) {
     console.error("Error getting Orders:", error);
     response.status(500).json({ error: "Internal server error" });
-}
+  }
 };
 
 
@@ -31,8 +31,8 @@ const getOrdersById = async (request, response) => {
   } else {
     response.status(200).json(OrdersById);
   }
- 
-  
+
+
 };
 
 
