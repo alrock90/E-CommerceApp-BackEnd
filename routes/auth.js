@@ -16,11 +16,12 @@ const register = async (req, res) => {
   const { name, email, telefon, password } = req.body;
 
   try {
-    const user = await models.Users.findOne({ where: { name: name } });
+    const user = await models.Users.findOne({ where: { email: email } });
     console.log(`user no existe ${user}`);
     if (user) {
       console.log("User already exists!");
-      return res.redirect("login");
+      //return res.redirect("login");
+      return res.status(409).json({ success: false, message: 'User already exists' });
     }
 
     console.log(`user no existe ${user}`);
@@ -42,7 +43,8 @@ const register = async (req, res) => {
         cartId: newCart.id
       });
       console.log("new user's auto-generated ID:", JSON.stringify(newUser.id));
-      res.status(201).send(`User added with ID: ${newUser.id}`);
+      //res.status(201).send(`User added with ID: ${newUser.id}`);
+      res.status(201).json({ success: true, userId: newUser.id });
 
 
       //res.redirect("login");
@@ -70,7 +72,8 @@ router.post('/login', (req, res, next) => {
       }
       if (!user) {
           console.log('Usuario no encontrado');
-          return res.redirect('/badlogin');
+          //return res.redirect('/badlogin');
+          return res.status(401).json({ success: false, message: 'Login failed' });
       }
       req.logIn(user, (err) => {
           if (err) {
@@ -79,7 +82,7 @@ router.post('/login', (req, res, next) => {
           }
           console.log('Usuario autenticado:', user);
           //return res.redirect('/goodlogin');
-          return res.status(200).json({ success: true, message: 'Login exitoso', user: { id: user.id, name: user.name, email: user.email, cartId: user.cartId } });
+          return res.status(200).json({ success: true, message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, cartId: user.cartId } });
       });
   })(req, res, next);
 });
@@ -97,16 +100,23 @@ router.get('/goodlogin', (req, res) => {
 });
 
 
-// Log out user:
+// Modifica la ruta de logout para usar req.logout() correctamente
 router.get("/logout", (req, res) => {
-  req.logout(err => {
+  console.log("logout");
+
+  const user = req.user ;
+  console.log("userId:",user)
+  console.log(req.userId); // Imprime el objeto de sesión
+  
+  req.logout((err) => { // Proporciona una función de devolución de llamada
     if (err) {
       console.error("Error during logout:", err);
-      return res.redirect("/"); // Redirecciona incluso si hay un error en el logout
+      return res.status(500).json({ success: false, message: "Logout failed" });
     }
-    res.redirect("/");
+    res.status(200).json({ success: true, message: "Logout successful" });
   });
 });
+
 
 
 router.post('/register', register);

@@ -7,9 +7,10 @@ const router = Router();
 // Middleware para proteger las rutas con Passport
 const authenticateUser = passport.authenticate('local', { session: false });
 
-const getCart = async (request, response) => {
-  const user = request.user;
-  //const cartId = parseInt(request.params.id);
+const getCart = async (req, response) => {
+  //console.log(req.user);
+  const user = req.user;
+  //const cartId = parseInt(req.params.id);
   console.log("userId:", user.id)
   console.log("cartId:", user.cartId)
   try {
@@ -20,27 +21,33 @@ const getCart = async (request, response) => {
       include: [models.Product]
     });
     response.status(200).json(cartUser);
+  
   } catch (error) {
     console.error("Error getting Cart:", error);
     response.status(500).json({ error: "Internal server error" });
   }
 };
 
-
 const addItem = async (request, response) => {
-  console.log("entre a addItem")
-  console.log(request.user)
-  //const cartId = request.user.cartId;
+  console.log("entre a addItem");
+  console.log(request.user);
   const { productId, quantity, cartId } = request.body;
 
   try {
     const result = await models.Cart_product.create({ quantity: quantity, productId: productId, cartId: cartId });
-    response.status(200).send(`Cart_product add new  `);;
+    if (result) {
+      // Si se agrega correctamente, devolver el nuevo producto agregado
+      const newProduct = await models.Product.findByPk(productId);
+      response.status(200).json({ success: true, message: 'Product added to cart successfully', products: newProduct });
+    } else {
+      response.status(400).json({ success: false, error: 'Failed to add product to cart' });
+    }
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
+
 
 const checkout = async (request, response) => {
   const cartId = request.user.cartId;
@@ -120,6 +127,8 @@ const updateItem = async (request, response) => {
 const deleteItem = async (request, response) => {
   const cartId = request.user.cartId;
   const productId = parseInt(request.params.id);
+  console.log("entre a delete")
+  console.log("productId " + productId);
 
   try {
     const result = await models.Cart_product.destroy({
@@ -128,8 +137,19 @@ const deleteItem = async (request, response) => {
         productId: productId
       }
     });
-    if (result) response.status(200).send(`Cart_product productId ${productId} deleted `);
-    if (!result) response.status(200).send(`Cart_product productId ${productId} not found `);
+    if (result) {
+      response.status(200).json({
+        success: true,
+        message: `Product with ID ${productId} deleted from cart`,
+        productId: productId
+      });
+    } else {
+      response.status(404).json({
+        success: false,
+        message: `Product with ID ${productId} not found in cart`,
+        productId: productId
+      });
+    }
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });

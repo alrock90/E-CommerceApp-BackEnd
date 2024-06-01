@@ -16,6 +16,7 @@ const corsOptions = {
   origin: 'http://localhost:3001', // Reemplaza con la URL de tu frontend
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // Permite incluir credenciales en la solicitud
 };
 
 app.use(cors(corsOptions));
@@ -30,7 +31,10 @@ app.use(
     secret: process.env.SESSION_SECRET || 'una_cadena_secreta_y_unica',
     saveUninitialized: false,
     resave: false,
-    cookie: { maxAge: 172800000 },
+    cookie: { maxAge: 172800000,
+      httpOnly: true,
+      sameSite: 'lax' // Asegúrate de que esto esté configurado correctamente según tu entorno
+     },
   })
 );
 
