@@ -20,7 +20,7 @@ const getCart = async (req, response) => {
       },
       include: [models.Product]
     });
-    response.status(200).json(cartUser);
+    response.status(200).json(cartUser[0].products);
   
   } catch (error) {
     console.error("Error getting Cart:", error);
