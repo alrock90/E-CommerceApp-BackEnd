@@ -1,5 +1,14 @@
+const { v4: uuidv4 } = require('uuid');
+
 const getUsersModel = (sequelize, { DataTypes }) => {
   const Users = sequelize.define('users', {
+    id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+      unique: true,
+      allowNull: false,
+      defaultValue: () => uuidv4(), // Generar automáticamente un UUID
+    },
     name: {
       type: DataTypes.STRING,
       unique: false,
@@ -21,10 +30,7 @@ const getUsersModel = (sequelize, { DataTypes }) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
+      allowNull: true,  // Permitir valores nulos para la autenticación de Google
     },
 
     cartId: {
@@ -36,6 +42,11 @@ const getUsersModel = (sequelize, { DataTypes }) => {
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL',
     },
+    // googleId: {
+    //   type: DataTypes.STRING,
+    //   unique: true,
+    //   allowNull: true,
+    // },
   });
 
   Users.associate = (models) => {

@@ -44,7 +44,8 @@ const register = async (req, res) => {
       });
       console.log("new user's auto-generated ID:", JSON.stringify(newUser.id));
       //res.status(201).send(`User added with ID: ${newUser.id}`);
-      res.status(201).json({ success: true, userId: newUser.id });
+      //res.status(201).json({ success: true, userId: newUser.id });
+      return res.status(200).json({ success: true, message: 'Login successful',   id: newUser.id, name: newUser.name, email: newUser.email, cartId: newUser.cartId  });
 
 
       //res.redirect("login");
@@ -60,7 +61,7 @@ const register = async (req, res) => {
   }
 };
 
-
+//local login
 
 router.post('/login', (req, res, next) => {
   console.log('Body de la solicitud:', req.body);
@@ -82,13 +83,42 @@ router.post('/login', (req, res, next) => {
           }
           console.log('Usuario autenticado:', user);
           //return res.redirect('/goodlogin');
-          return res.status(200).json({ success: true, message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, cartId: user.cartId } });
+          return res.status(200).json({ success: true, message: 'Login successful',   id: user.id, name: user.name, email: user.email, cartId: user.cartId  });
       });
+  })(req, res, next);
+});
+
+// Autenticación con Google// Autenticación con Google
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/auth/google/callback', (req, res, next) => {
+  passport.authenticate('google', { failureRedirect: '/' }, (err, user, info) => {
+    if (err) {
+      console.error('Error durante la autenticación:', err);
+      return next(err);
+    }
+    if (!user) {
+      console.log('Usuario no autenticado');
+      return res.status(401).json({ success: false, message: 'Authentication failed' });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        console.error('Error durante la sesión:', err);
+        return next(err);
+      }
+      console.log('Usuario autenticado:', user);
+      res.redirect('http://localhost:3001'); // Redirige al frontend después de la autenticación exitosa
+      //res.redirect('http://localhost:3001/auth/loginUserWithGoogle'); // Redirige al frontend después de la autenticación exitosa
+      //
+    });
   })(req, res, next);
 });
 
 
 
+
+
+//To delete
 
 router.get('/badlogin', (req, res) => {
   res.send("bad login")

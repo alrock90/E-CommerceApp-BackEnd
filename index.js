@@ -21,6 +21,18 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "default-src 'self' https://apis.google.com; script-src 'self' https://apis.google.com; style-src 'self' 'unsafe-inline';");
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  next();
+});
+
+
+
 // Import Passport config
 require("./config/passport");
 

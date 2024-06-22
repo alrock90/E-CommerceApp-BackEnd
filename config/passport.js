@@ -1,120 +1,80 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require("bcrypt");
 const { sequelize, models } = require('../models');
 
 
 console.log("users model:")
 console.log(models.Users)
-/* 
-passport.use(
-  new LocalStrategy(async (username, password, done) => {
-    try {
-      console.log("entre");
-
-      // Utilizar findOne para buscar el usuario directamente
-      const user = await models.Users.findOne({ where: { name: username } });
-
-      console.log("entre a async fun");
-
-      console.error(user);
-
-      if (!user) {
-        return done(null, false, { message: 'Usuario no encontrado' });
-      }
-
-      const matchedPassword = await bcrypt.compare(password, user.password);
-
-      console.error("matchedPassword");
-      console.error(matchedPassword);
-      if (!matchedPassword) {
-        return done(null, false, { message: 'Contraseña incorrecta' });
-      }
-
-      return done(null, user);
-    } catch (error) {
-      console.error(error);
-      return done(error);
-    }
-  })
-); */
-/* 
-passport.use(
-  new LocalStrategy(async (username, password, cb) => {
-    try {
-      console.log("entre a LocalStrategy");
-
-      const user = await models.Users.findOne({ where: { name: username } });
-
-      if (!user) {
-        console.log("Usuario no encontrado");
-        return cb(null, false, { message: 'Usuario no encontrado' });
-      }
-
-      const matchedPassword = await bcrypt.compare(password, user.password);
-
-      if (!matchedPassword) {
-        console.log("Contraseña incorrecta");
-        return cb(null, false, { message: 'Contraseña incorrecta' });
-      }
-
-      console.log("Usuario autenticado correctamente");
-      return cb(null, user, { message: 'Login exitoso' });
-    } catch (error) {
-      console.error("Error durante la autenticación:", error);
-      return cb(error);
-    }
-  })
-); */
-
-/* passport.use(new LocalStrategy(
-  async (username, password, done) => {
-    models.Users.findOne({ username: username }, async (err, user) => {
-      if (err) { return done(err); }
-      if (!user) { return done(null, false); }
-
-      const matchedPassword = await bcrypt.compare(password, user.password);
-      if (!matchedPassword) { return done(null, false); }
-      return done(null, user);
-    });
-  }
-)); */
-
 
 passport.use(new LocalStrategy({
   usernameField: 'email', // especifica que el campo de usuario es 'email'
   passwordField: 'password' // campo de contraseña sigue siendo 'password'
-},async (email, password, done) => {
+}, async (email, password, done) => {
   try {
-    console.log("entre")
-    console.log(email)
-    console.log(password)
-    const usuario = await models.Users.findOne({ where: { email: email } });
-    console.log(usuario.id)
-    if (!usuario) {
-      return done(null, false, { message: 'Usuario no encontrado' });
-    }
-
-    try {
-      const match = await bcrypt.compare(password, usuario.password);
-      if (match) {
-        console.log("user correcto")
-        return done(null, usuario);
-      } else {
-        return done(null, false, { message: 'Contraseña incorrecta' });
+    process.nextTick(async () => {
+      console.log("entre")
+      console.log(email)
+      console.log(password)
+      const usuario = await models.Users.findOne({ where: { email: email } });
+      console.log(usuario.id)
+      console.log(usuario)
+      if (!usuario) {
+        return done(null, false, { message: 'Usuario no encontrado' });
       }
-    } catch (error) {
-      console.error('Error al comparar contraseñas:', error);
-      return done(error);
-    }
 
+      try {
+        const match = await bcrypt.compare(password, usuario.password);
+        if (match) {
+          console.log("user correcto")
+          return done(null, usuario);
+        } else {
+          return done(null, false, { message: 'Contraseña incorrecta' });
+        }
+      } catch (error) {
+        console.error('Error al comparar contraseñas:', error);
+        return done(error);
+      }
 
+    });
   } catch (error) {
     return done(error);
   }
 }));
 
+//google auth strategy
 
+console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID);
+console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
+
+// Estrategia Google
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    let user = await models.Users.findOne({ where: { id: profile.id } });
+    if (!user) {
+
+      // Create a new Cart
+      const newCart = await models.Cart.create();
+      console.log("new Cart's auto-generated ID:", JSON.stringify(newCart.id));
+
+      user = await models.Users.create({
+        //googleId: profile.id,
+        id: profile.id,
+        name: profile.displayName,
+        email: profile.emails[0].value,
+        cartId: newCart.id
+      });
+    }
+    return done(null, user);
+  } catch (error) {
+    return done(error, false);
+  }
+}));
 
 
 // Serialize a user
@@ -135,28 +95,6 @@ passport.deserializeUser(async (id, done) => {
     return done(err);
   }
 });
-
-
-
-/* const findByUsername = async (username, callBackUserfounded) => {
-  try {
-      const search = await models.Users.findOne({
-          where: {
-              name: username
-          }
-      });
-
-      if (!search) {
-          callBackUserfounded(null, false); // Usuario no encontrado
-          console.log("usuario no encontrado 1");
-      } else {
-          callBackUserfounded(null, search); // Usuario encontrado
-          console.log("usuario encontrado 1");
-      }
-  } catch (error) {
-      callBackUserfounded(error, false); // Error en la búsqueda
-  }
-}; */
 
 
 
