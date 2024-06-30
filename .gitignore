@@ -1,3 +1,4 @@
+
 # Ignorar archivos .env
 .env
 
@@ -6,3 +7,6 @@ node_modules/
 
 # Ignorar archivos de logs
 *.log
+
+# Ignorar archivo example.env
+example.env
