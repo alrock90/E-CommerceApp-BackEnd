@@ -3,7 +3,7 @@ const { Router } = require('express');
 const { models } = require('../models');
 const passport = require('passport');
 const router = Router();
-const stripe = require('stripe')('YOUR_STRIPE_SECRET_KEY');
+//const stripe = require('stripe')('YOUR_STRIPE_SECRET_KEY');
 
 // Middleware para proteger las rutas con Passport
 const authenticateUser = passport.authenticate('local', { session: false });

@@ -4,6 +4,7 @@ const productRouter = require('./products');
 const orderRouter = require('./orders');
 const authRouter = require('./auth');
 const cartRouter = require('./carts');
+const paymentRouter = require('./payment');
 
 
 const router = express.Router();
@@ -17,5 +18,6 @@ const router = express.Router();
     productRouter,
     orderRouter,
     authRouter,
-    cartRouter
+    cartRouter,
+    paymentRouter
   }

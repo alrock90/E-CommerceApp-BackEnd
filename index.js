@@ -10,8 +10,6 @@ const session = require("express-session");
 const passport = require("passport");
 const path = require('path');
 
-const Stripe = require('stripe');
-
 // Configuración de CORS
 const corsOptions = {
   origin: 'http://localhost:3001', // Reemplaza con la URL de tu frontend
@@ -57,6 +55,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 //Bodyparser
 app.use(bodyParser.json());
 app.use(
@@ -87,6 +86,7 @@ app.use('/order', routes.orderRouter);
 app.use('/cart', routes.cartRouter);
 //app.use('/', routes.authRouter);
 app.use('/', routes.authRouter); // Asegúrate de que authRouter esté correctamente definido en tu objeto routes
+app.use('/', routes.paymentRouter); 
 
 
 
