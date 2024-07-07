@@ -3,6 +3,7 @@ const { Router } = require('express');
 const { models } = require('../models');
 const passport = require('passport');
 const router = Router();
+const stripe = require('stripe')('YOUR_STRIPE_SECRET_KEY');
 
 // Middleware para proteger las rutas con Passport
 const authenticateUser = passport.authenticate('local', { session: false });
@@ -21,7 +22,7 @@ const getCart = async (req, response) => {
       include: [models.Product]
     });
     response.status(200).json(cartUser[0].products);
-  
+
   } catch (error) {
     console.error("Error getting Cart:", error);
     response.status(500).json({ error: "Internal server error" });
@@ -34,7 +35,12 @@ const addItem = async (request, response) => {
   const { productId, quantity, cartId } = request.body;
 
   try {
-    const result = await models.Cart_product.create({ quantity: quantity, productId: productId, cartId: cartId });
+    const result = await models.Cart_product.create(
+      {
+        quantity: quantity,
+        productId: productId,
+        cartId: cartId
+      });
     if (result) {
       // Si se agrega correctamente, devolver el nuevo producto agregado
       const newProduct = await models.Product.findByPk(productId);
@@ -51,6 +57,7 @@ const addItem = async (request, response) => {
 
 const checkout = async (request, response) => {
   const cartId = request.user.cartId;
+  console.log("cartId:", cartId)
   const cartToCheckOut = await models.Cart.findAll({
     where: {
       id: cartId
@@ -59,8 +66,12 @@ const checkout = async (request, response) => {
   });
   const productInCart = cartToCheckOut[0].products;
 
+  console.log("productInCart")
+  console.log(productInCart)
+
   //if the cart is empty, go out and not create the order
   if (!productInCart || productInCart.length === 0) {
+    console.log("cart empty")
     return response.status(400).json({ success: false, error: 'El carrito está vacío' });
   }
 
@@ -73,22 +84,24 @@ const checkout = async (request, response) => {
 
   });
 
+  console.log("total:", total)
 
   try {
     //new order
     const newOrder = await models.Orders.create({ total: total, userId: request.user.id });
     //copy productos to products_order
+    
     for (const item of productInCart) {
-      const result = await models.Product_order.create(
+      console.log("item.cart_product?.quantity",item.cart_product?.quantity)
+      console.log("productId",item.id)
+      console.log("orderId",newOrder.id)
+      const result = await models.Products_orders.create(
         {
           quantity: item.cart_product?.quantity,
           productId: item.id,
           orderId: newOrder.id
-        }, {
-        where: {
-          cartId: cartId
         }
-      }
+         //{        where: {cartId: cartId}      }
       );
     };
     //delete al items en cart
@@ -98,8 +111,10 @@ const checkout = async (request, response) => {
       }
     });
 
+    console.log("cart deleted")
     //send response
     response.status(200).send(`Order add new  `);;
+
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
@@ -157,7 +172,7 @@ const deleteItem = async (request, response) => {
 };
 
 router.get('/', getCart);
-router.post('/checkout', checkout);
+router.get('/checkout', checkout);
 router.post('/', addItem);
 router.put('/', updateItem);
 router.delete('/:id', deleteItem);

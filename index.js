@@ -8,8 +8,9 @@ const { sequelize, models } = require('./models');
 const cors = require('cors');
 const session = require("express-session");
 const passport = require("passport");
-
 const path = require('path');
+
+const Stripe = require('stripe');
 
 // Configuración de CORS
 const corsOptions = {
