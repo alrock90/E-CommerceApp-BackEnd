@@ -14,6 +14,14 @@ const getProductsOrdersModel = (sequelize, { DataTypes }) => {
       allowNull: false,
     },
   }, { timestamps: false });
+
+
+  Products_orders.associate = (models) => {
+    models.Orders.belongsToMany(models.Product, { through: models.Products_orders });
+    models.Product.belongsToMany(models.Orders, { through: models.Products_orders });
+  };
+
+
 /*
   Products_orders.associate = (models) => {
     //Products_orders.belongsTo(models.Users);
