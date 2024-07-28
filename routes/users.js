@@ -16,7 +16,8 @@ const getUsers = async (request, response) => {
 
 
 const getUserById = async (request, response) => {
-  const id = parseInt(request.params.id);
+  //const id = parseInt(request.params.id);
+  const id = request.params.id;  // Asegúrate de que esto es una cadena
   const userById = await models.Users.findByPk(id);
   if (userById === null) {
     response.status(404).send("not found!");
@@ -27,36 +28,38 @@ const getUserById = async (request, response) => {
 };
 
 
-
-
-/* const createUser = async (request, response) => {
-  const { name, email, telefon } = request.body;
-  // Create a new user
-  const newuser = await models.Users.create({ name: name, email: email, telefon: telefon });
-  console.log("new user's auto-generated ID:",  JSON.stringify(newuser.id));
- 
-      response.status(201).send(`User added with ID: ${ JSON.stringify(newuser.id)}`);
-    
-  
-}; */
-
 const updateUser = async (request, response) => {
-  const idUpdate = parseInt(request.params.id);
+  const idUpdate = request.params.id;  // Asegúrate de que esto es una cadena
   const { name, email, telefon } = request.body;
-      console.log(`id to uodate ${idUpdate}`)
-      try {
-        // Actualizar usuarios sin apellido a "Doe"
-        const result = await models.Users.update({ name: name, email: email, telefon: telefon }, {
-          where: {
-            id: idUpdate
-          }
-        });  
-        response.status(200).send(`User modified with ID: ${idUpdate} updatedRows: ${result[0]} `);;
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: 'Internal Server Error' });
+  console.log(`id to update ${idUpdate}`);
+
+  try {
+    // Actualizar usuario
+    const [updatedRows] = await models.Users.update(
+      { name: name, email: email, telefon: telefon },
+      {
+        where: {
+          id: idUpdate
+        }
       }
+    );
+
+    // Verificar si se actualizó alguna fila
+    if (updatedRows === 0) {
+      return response.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Obtener el usuario actualizado
+    const updatedUser = await models.Users.findByPk(idUpdate);
+
+    // Devolver el usuario actualizado
+    response.status(200).json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
 };
+
 
 const deleteUser = async (request, response) => {
   const id = parseInt(request.params.id);
@@ -83,11 +86,23 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login'); // Redirigir al inicio de sesión si no está autenticado
 }
 
+
+// Middleware para proteger las rutas
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  console.log("please relogin")
+  res.status(401).json({ success: false, message: 'Please login again' });
+}
+
+
+
 router.get('/', getUsers);
-router.get('/:id',ensureAuthenticated, getUserById);
+router.get('/:id',isAuthenticated, getUserById);
 //router.post('/', createUser);
-router.put('/:id',ensureAuthenticated, updateUser);
-router.delete('/:id',ensureAuthenticated, deleteUser);
+router.put('/:id',isAuthenticated, updateUser);
+router.delete('/:id',isAuthenticated, deleteUser);
 
 
 

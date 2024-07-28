@@ -79,9 +79,17 @@ const getOrdersById = async (request, response) => {
 
 };
 
+// Middleware para proteger las rutas
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  console.log("please relogin")
+  res.status(401).json({ success: false, message: 'Please login again' });
+}
 
 
-router.get('/', getOrders);
-router.get('/:id', getOrdersById);
+router.get('/', isAuthenticated, getOrders);
+router.get('/:id', isAuthenticated, getOrdersById);
 
 module.exports = router;
