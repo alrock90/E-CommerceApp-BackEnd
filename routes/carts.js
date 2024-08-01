@@ -171,11 +171,21 @@ const deleteItem = async (request, response) => {
   }
 };
 
-router.get('/', getCart);
-router.get('/checkout', checkout);
-router.post('/', addItem);
-router.put('/', updateItem);
-router.delete('/:id', deleteItem);
+// Middleware para proteger las rutas
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  console.log("please relogin")
+  res.status(401).json({ success: false, message: 'Please login again' });
+}
+
+
+router.get('/',isAuthenticated, getCart);
+router.get('/checkout',isAuthenticated,  checkout);
+router.post('/',isAuthenticated, addItem);
+router.put('/', isAuthenticated, updateItem);
+router.delete('/:id',isAuthenticated,  deleteItem);
 
 
 
