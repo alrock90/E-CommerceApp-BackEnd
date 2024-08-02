@@ -1,8 +1,9 @@
 
 const { Pool } = require('pg');
 const { DB } = require('../config');
+const { connectionString } = require('pg/lib/defaults');
 
-
+/*
 const pool = new Pool({
   user: DB.PGUSER,
   host: DB.PGHOST,
@@ -10,11 +11,13 @@ const pool = new Pool({
   password: DB.PGPASSWORD,
   port: DB.PGPORT,
 });
-console.log(DB.PGUSER);
-console.log(DB.PGHOST);
-console.log(DB.PGDATABASE);
-console.log(DB.PGPASSWORD);
-console.log(DB.PGPORT);
+*/
+
+
+const pool = new Pool({
+  connectionString: DB.PGURL,
+});
+
 
 
 module.exports = pool; // Exporta la instancia del pool para su uso en otros archivos

@@ -6,7 +6,7 @@ const getCartModel = require('./cart');
 const getCartProductModel = require('./cart_products');
 const getOrderProductModel = require('./products_orders');
 
-
+/*
 const sequelize = new Sequelize(
   process.env.PGDATABASE,
   process.env.PGUSER,
@@ -15,6 +15,17 @@ const sequelize = new Sequelize(
     dialect: 'postgres',
   },
 );
+*/
+const sequelize = new Sequelize(process.env.PGURL, {
+  dialect: 'postgres',
+  protocol: 'postgres',
+  dialectOptions: {
+    ssl: true,
+    native: true
+  }
+})
+
+
 
 const models = {
   Users: getUsersModel(sequelize, Sequelize),
