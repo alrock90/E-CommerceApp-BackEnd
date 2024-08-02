@@ -95,6 +95,7 @@ router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 
 
 router.get('/auth/google/callback', (req, res, next) => {
   passport.authenticate('google', { failureRedirect: '/' }, (err, user, info) => {
+    console.log("entre a passport auth")
     if (err) {
       console.error('Error durante la autenticación:', err);
       return next(err);
@@ -111,6 +112,8 @@ router.get('/auth/google/callback', (req, res, next) => {
       console.log('Usuario autenticado:', user);
       const token = jwt.sign({ id: user.id, email: user.email, name: user.name, cartId: user.cartId }, secretKey, { expiresIn: '1h' });
       // Redirige al frontend con el token en la query string
+      console.log("callbackFrontend")
+      console.log(callbackFrontend)
       res.redirect(`${callbackFrontend}/auth/loginUserWithGoogle?token=${token}`);
       //res.redirect(`http://localhost:3001/auth/loginUserWithGoogle?token=${token}`);
       
