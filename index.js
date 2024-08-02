@@ -12,7 +12,7 @@ const path = require('path');
 
 // Configuración de CORS https://e-commercealrock.onrender.com
 const corsOptions = {
-  origin: 'https://e-commercealrock.onrender.com:3000', // Reemplaza con la URL de tu frontend
+  origin: 'https://e-commercealrock.onrender.com', // Reemplaza con la URL de tu frontend
   //origin: 'http://localhost:3001', // Reemplaza con la URL de tu frontend
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization'],
