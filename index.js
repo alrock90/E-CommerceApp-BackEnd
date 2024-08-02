@@ -43,9 +43,11 @@ app.use(
     secret: process.env.SESSION_SECRET || 'una_cadena_secreta_y_unica',
     saveUninitialized: false,
     resave: false,
-    cookie: { maxAge: 172800000,
+    cookie: { 
+      maxAge: 172800000,
       httpOnly: true,
-      sameSite: 'lax' // Asegúrate de que esto esté configurado correctamente según tu entorno
+      sameSite: 'None', // Permite el envío en contextos de terceros
+      secure: true // Asegura que las cookies solo se envíen a través de HTTPS
      },
   })
 );
