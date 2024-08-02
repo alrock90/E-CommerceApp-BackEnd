@@ -52,7 +52,7 @@ console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.CALLBACKURL
+  callbackURL: 'http://localhost:3000/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await models.Users.findOne({ where: { id: profile.id } });

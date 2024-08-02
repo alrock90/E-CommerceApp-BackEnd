@@ -9,6 +9,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const secretKey = 'process.env.SESSION_SECRET_TOKEN'; 
+const callbackFrontend = 'process.env.CALLBACKURLFRONT'; 
 
 
 
@@ -110,11 +111,9 @@ router.get('/auth/google/callback', (req, res, next) => {
       console.log('Usuario autenticado:', user);
       const token = jwt.sign({ id: user.id, email: user.email, name: user.name, cartId: user.cartId }, secretKey, { expiresIn: '1h' });
       // Redirige al frontend con el token en la query string
-      res.redirect(`http://localhost:3001/auth/loginUserWithGoogle?token=${token}`);
-
-      //res.redirect('http://localhost:3001'); // Redirige al frontend después de la autenticación exitosa
-      //res.redirect('http://localhost:3001/auth/loginUserWithGoogle'); // Redirige al frontend después de la autenticación exitosa
-      //
+      res.redirect(`${callbackFrontend}/auth/loginUserWithGoogle?token=${token}`);
+      //res.redirect(`http://localhost:3001/auth/loginUserWithGoogle?token=${token}`);
+      
     });
   })(req, res, next);
 });
