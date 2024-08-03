@@ -93,6 +93,17 @@ app.get('/', (req, res) => {
   res.send('¡Bienvenido a la aplicación    !');
 });
 
+app.get('/set-cookie', (req, res) => {
+  res.cookie('test_cookie', 'test_value');
+  res.send('Cookie has been set');
+});
+
+app.get('/check-cookie', (req, res) => {
+  console.log('Cookies:', req.cookies);
+  res.send('Check your console for cookies');
+});
+
+
 
 
 // Montar los enrutadores en las rutas específicas
