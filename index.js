@@ -9,6 +9,7 @@ const cors = require('cors');
 const session = require("express-session");
 const passport = require("passport");
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 // Configuración de CORS https://e-commercealrock.onrender.com
 /*
@@ -20,6 +21,10 @@ const corsOptions = {
   credentials: true // Permite incluir credenciales en la solicitud
 };
 */
+
+// Middleware para parsear cookies
+app.use(cookieParser());
+
 const corsOptions = {
   origin: ['https://e-commercealrock.onrender.com', 'http://localhost:3001'], // Lista de orígenes permitidos
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

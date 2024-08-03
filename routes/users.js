@@ -97,11 +97,15 @@ function isAuthenticated(req, res, next) {
   console.log("please relogin")
   res.status(401).json({ success: false, message: 'Please login again' });
 }
-*/
-const jwt = require('jsonwebtoken');
+*/const jwt = require('jsonwebtoken');
 const secretKey = process.env.SESSION_SECRET_TOKEN || 'yourSecretKey';
 
 function isAuthenticated(req, res, next) {
+  if (!req.cookies) {
+    console.log("Cookies not found. Please login again.");
+    return res.status(401).json({ success: false, message: 'Please login again' });
+  }
+
   const token = req.cookies.session_token; // Obtén la cookie
 
   if (!token) {
