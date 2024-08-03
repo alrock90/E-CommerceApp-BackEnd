@@ -11,12 +11,20 @@ const passport = require("passport");
 const path = require('path');
 
 // Configuración de CORS https://e-commercealrock.onrender.com
+/*
 const corsOptions = {
   origin: 'https://e-commercealrock.onrender.com', // Reemplaza con la URL de tu frontend
   //origin: 'http://localhost:3001', // Reemplaza con la URL de tu frontend
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true // Permite incluir credenciales en la solicitud
+};
+*/
+const corsOptions = {
+  origin: ['https://e-commercealrock.onrender.com', 'http://localhost:3001'], // Lista de orígenes permitidos
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 };
 
 app.use(cors(corsOptions));
