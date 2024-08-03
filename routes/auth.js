@@ -94,7 +94,7 @@ router.post('/login', (req, res, next) => {
       res.cookie('session_token', token, {
         httpOnly: true,
         secure: true,
-        sameSite: 'Strict',
+        sameSite: 'None',
         maxAge: 3600000 // 1 hora
       });
 
