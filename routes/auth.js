@@ -8,7 +8,7 @@ const passport = require('../config/passport'); // Ruta correcta al archivo pass
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
-const secretKey = 'process.env.SESSION_SECRET_TOKEN'; 
+const secretKey = 'process.env.SESSION_SECRET_TOKEN';
 const callbackFrontend = process.env.CALLBACKURLFRONT || 'https://e-commercealrock.onrender.com';
 
 console.log("callbackFrontendtest:" + callbackFrontend)
@@ -48,7 +48,7 @@ const register = async (req, res) => {
       console.log("new user's auto-generated ID:", JSON.stringify(newUser.id));
       //res.status(201).send(`User added with ID: ${newUser.id}`);
       //res.status(201).json({ success: true, userId: newUser.id });
-      return res.status(200).json({ success: true, message: 'Login successful',   id: newUser.id, name: newUser.name, email: newUser.email, cartId: newUser.cartId  });
+      return res.status(200).json({ success: true, message: 'Login successful', id: newUser.id, name: newUser.name, email: newUser.email, cartId: newUser.cartId });
 
 
       //res.redirect("login");
@@ -70,24 +70,36 @@ router.post('/login', (req, res, next) => {
   console.log('Body de la solicitud:', req.body);
 
   passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error('Error durante la autenticación:', err);
+      return next(err);
+    }
+    if (!user) {
+      console.log('Usuario no encontrado');
+      //return res.redirect('/badlogin');
+      return res.status(401).json({ success: false, message: 'Login failed' });
+    }
+    req.logIn(user, (err) => {
       if (err) {
-          console.error('Error durante la autenticación:', err);
-          return next(err);
+        console.error('Error durante la sesión:', err);
+        return next(err);
       }
-      if (!user) {
-          console.log('Usuario no encontrado');
-          //return res.redirect('/badlogin');
-          return res.status(401).json({ success: false, message: 'Login failed' });
-      }
-      req.logIn(user, (err) => {
-          if (err) {
-              console.error('Error durante la sesión:', err);
-              return next(err);
-          }
-          console.log('Usuario autenticado:', user);
-          //return res.redirect('/goodlogin');
-          return res.status(200).json({ success: true, message: 'Login successful',   id: user.id, name: user.name, email: user.email, cartId: user.cartId  });
+      console.log('Usuario autenticado:', user);
+      //return res.redirect('/goodlogin');
+      //return res.status(200).json({ success: true, message: 'Login successful', id: user.id, name: user.name, email: user.email, cartId: user.cartId  });
+      // Generar un token JWT
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, secretKey, { expiresIn: '1h' });
+
+      // Configurar la cookie con el token
+      res.cookie('session_token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Strict',
+        maxAge: 3600000 // 1 hora
       });
+
+      return res.status(200).json({ success: true, message: 'Login successful', id: user.id, name: user.name, email: user.email, cartId: user.cartId });
+    });
   })(req, res, next);
 });
 
@@ -112,12 +124,20 @@ router.get('/auth/google/callback', (req, res, next) => {
       }
       console.log('Usuario autenticado:', user);
       const token = jwt.sign({ id: user.id, email: user.email, name: user.name, cartId: user.cartId }, secretKey, { expiresIn: '1h' });
+         // Configurar la cookie con el token
+         res.cookie('session_token', token, {
+          httpOnly: true,
+          secure: true, // Usar cookies seguras solo en producción
+          sameSite: 'Strict',
+          maxAge: 3600000 // 1 hora
+        });
+      
       // Redirige al frontend con el token en la query string
       console.log("callbackFrontend")
       console.log(callbackFrontend)
       res.redirect(`${callbackFrontend}/auth/loginUserWithGoogle?token=${token}`);
       //res.redirect(`http://localhost:3001/auth/loginUserWithGoogle?token=${token}`);
-      
+
     });
   })(req, res, next);
 });
@@ -142,10 +162,10 @@ router.get('/goodlogin', (req, res) => {
 router.get("/logout", (req, res) => {
   console.log("logout");
 
-  const user = req.user ;
-  console.log("userId:",user)
+  const user = req.user;
+  console.log("userId:", user)
   console.log(req.userId); // Imprime el objeto de sesión
-  
+
   req.logout((err) => { // Proporciona una función de devolución de llamada
     if (err) {
       console.error("Error during logout:", err);
