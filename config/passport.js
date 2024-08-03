@@ -47,7 +47,7 @@ passport.use(new LocalStrategy({
 
 console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID);
 console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
-const callbackBackend = process.env.CALLBACKURL; 
+const callbackBackend = process.env.CALLBACKURL || 'https://e-commercealrock.onrender.com/auth/google/callback'; 
 
 // Estrategia Google
 passport.use(new GoogleStrategy({

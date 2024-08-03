@@ -9,8 +9,9 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const secretKey = 'process.env.SESSION_SECRET_TOKEN'; 
-const callbackFrontend = process.env.CALLBACKURLFRONT; 
+const callbackFrontend = process.env.CALLBACKURL || 'https://e-commercealrock.onrender.com/auth/google/callback';
 
+console.log("callbackFrontendtest:" + callbackFrontend)
 
 
 
