@@ -128,7 +128,7 @@ router.get('/auth/google/callback', (req, res, next) => {
          res.cookie('session_token', token, {
           httpOnly: true,
           secure: true, // Usar cookies seguras solo en producción
-          sameSite: 'Strict',
+          sameSite: 'lax',
           maxAge: 3600000 // 1 hora
         });
       

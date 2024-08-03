@@ -59,7 +59,7 @@ app.use(
     cookie: { 
       maxAge: 172800000,
       httpOnly: true,
-      sameSite: 'None', // Permite el envío en contextos de terceros
+      sameSite: 'lax', // Permite el envío en contextos de terceros
       secure: true // Asegura que las cookies solo se envíen a través de HTTPS
      },
   })
