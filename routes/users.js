@@ -89,6 +89,7 @@ function ensureAuthenticated(req, res, next) {
 
 // Middleware para proteger las rutas
 function isAuthenticated(req, res, next) {
+  console.log('Body de la solicitud:', req.body);
   if (req.isAuthenticated()) {
     return next();
   }

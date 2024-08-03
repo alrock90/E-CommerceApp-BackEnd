@@ -14,12 +14,12 @@ passport.use(new LocalStrategy({
 }, async (email, password, done) => {
   try {
     process.nextTick(async () => {
-      console.log("entre")
-      console.log(email)
-      console.log(password)
+      console.log("entre passport")
+      //console.log(email)
+      //console.log(password)
       const usuario = await models.Users.findOne({ where: { email: email } });
-      console.log(usuario.id)
-      console.log(usuario)
+      //console.log(usuario.id)
+      //console.log(usuario)
       if (!usuario) {
         return done(null, false, { message: 'Usuario no encontrado' });
       }
@@ -45,8 +45,8 @@ passport.use(new LocalStrategy({
 
 //google auth strategy
 
-console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID);
-console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
+//console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID);
+//console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET);
 const callbackBackend = process.env.CALLBACKURL || 'https://e-commerceapp-backend-gqme.onrender.com'; 
 
 // Estrategia Google

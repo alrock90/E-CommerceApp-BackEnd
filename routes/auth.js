@@ -67,7 +67,7 @@ const register = async (req, res) => {
 //local login
 
 router.post('/login', (req, res, next) => {
-  console.log('Body de la solicitud:', req.body);
+  //console.log('Body de la solicitud:', req.body);
 
   passport.authenticate('local', (err, user, info) => {
     if (err) {
