@@ -101,12 +101,13 @@ function isAuthenticated(req, res, next) {
 const secretKey = process.env.SESSION_SECRET_TOKEN || 'yourSecretKey';
 
 function isAuthenticated(req, res, next) {
+  console.log('Cookies recibidas:', req.cookies); // Agrega esta línea para ver todas las cookies recibidas
+
   if (!req.cookies) {
     console.log("Cookies not found. Please login again.");
     return res.status(401).json({ success: false, message: 'Please login again' });
   }
-  console.log("cookies:")
-  console.log(req.cookies)
+  
 
   const token = req.cookies.session_token; // Obtén la cookie
 
