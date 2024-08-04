@@ -67,7 +67,6 @@ const register = async (req, res) => {
 //local login
 
 router.post('/login', (req, res, next) => {
-  //console.log('Body de la solicitud:', req.body);
 
   passport.authenticate('local', (err, user, info) => {
     if (err) {
@@ -85,10 +84,7 @@ router.post('/login', (req, res, next) => {
         return next(err);
       }
       console.log('Usuario autenticado:', user);
-      //return res.redirect('/goodlogin');
-      //return res.status(200).json({ success: true, message: 'Login successful', id: user.id, name: user.name, email: user.email, cartId: user.cartId  });
       // Generar un token JWT
-console.log("secretkey:"+secretKey)
       const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, secretKey, { expiresIn: '1h' });
 
       // Configurar la cookie con el token
@@ -124,18 +120,18 @@ router.get('/auth/google/callback', (req, res, next) => {
         return next(err);
       }
       console.log('Usuario autenticado:', user);
-      const token = jwt.sign({ id: user.id, email: user.email, name: user.name, cartId: user.cartId }, secretKey, { expiresIn: '1h' });
-         // Configurar la cookie con el token
-         res.cookie('session_token', token, {
-          httpOnly: true,
-          secure: true, // Usar cookies seguras solo en producción
-          sameSite: 'lax',
-          maxAge: 3600000 // 1 hora
-        });
-      
+      // Generar un token JWT
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, secretKey, { expiresIn: '1h' });
+
+      // Configurar la cookie con el token
+      res.cookie('session_token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        maxAge: 3600000 // 1 hora
+      });
+
       // Redirige al frontend con el token en la query string
-      console.log("callbackFrontend")
-      console.log(callbackFrontend)
       res.redirect(`${callbackFrontend}/auth/loginUserWithGoogle?token=${token}`);
       //res.redirect(`http://localhost:3001/auth/loginUserWithGoogle?token=${token}`);
 
