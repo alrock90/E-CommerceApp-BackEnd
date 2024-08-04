@@ -8,7 +8,7 @@ const passport = require('../config/passport'); // Ruta correcta al archivo pass
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
-const secretKey = 'process.env.SESSION_SECRET_TOKEN';
+const secretKey = process.env.SESSION_SECRET_TOKEN;
 const callbackFrontend = process.env.CALLBACKURLFRONT || 'https://e-commercealrock.onrender.com';
 
 console.log("callbackFrontendtest:" + callbackFrontend)
