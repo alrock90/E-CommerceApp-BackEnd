@@ -168,6 +168,14 @@ router.get("/logout", (req, res) => {
       console.error("Error during logout:", err);
       return res.status(500).json({ success: false, message: "Logout failed" });
     }
+      // Clear the session_token cookie by setting it to an expired date
+      res.clearCookie('session_token', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None'
+      });
+  
+
     res.status(200).json({ success: true, message: "Logout successful" });
   });
 });
