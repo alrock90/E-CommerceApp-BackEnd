@@ -88,7 +88,7 @@ router.post('/login', (req, res, next) => {
       //return res.redirect('/goodlogin');
       //return res.status(200).json({ success: true, message: 'Login successful', id: user.id, name: user.name, email: user.email, cartId: user.cartId  });
       // Generar un token JWT
-consolé.log("secretkey:"+secretKey)
+console.log("secretkey:"+secretKey)
       const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, secretKey, { expiresIn: '1h' });
 
       // Configurar la cookie con el token
