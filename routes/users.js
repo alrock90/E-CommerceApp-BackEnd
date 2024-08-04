@@ -86,18 +86,7 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login'); // Redirigir al inicio de sesión si no está autenticado
 }
 
-
-// Middleware para proteger las rutas
-/*
-function isAuthenticated(req, res, next) {
-  console.log('Body de la solicitud:', req.body);
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  console.log("please relogin")
-  res.status(401).json({ success: false, message: 'Please login again' });
-}
-*/const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const secretKey = process.env.SESSION_SECRET_TOKEN || 'yourSecretKey';
 
 function isAuthenticated(req, res, next) {
@@ -106,16 +95,12 @@ console.log("secretkey:"+secretKey)
   if (!req.cookies) {
     console.log("Cookies not found. Please login again.");
     return res.status(401).json({ success: false, message: 'Please login again' });
-  }
-  
-
+  }  
   const token = req.cookies.session_token; // Obtén la cookie
-
   if (!token) {
     console.log("Token not found. Please login again.");
     return res.status(401).json({ success: false, message: 'Please login again' });
   }
-
   try {
     // Verifica el token
     const decoded = jwt.verify(token, secretKey);

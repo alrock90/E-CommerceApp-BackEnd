@@ -181,16 +181,12 @@ console.log("secretkey:"+secretKey)
   if (!req.cookies) {
     console.log("Cookies not found. Please login again.");
     return res.status(401).json({ success: false, message: 'Please login again' });
-  }
-
-
+  }  
   const token = req.cookies.session_token; // Obtén la cookie
-
   if (!token) {
     console.log("Token not found. Please login again.");
     return res.status(401).json({ success: false, message: 'Please login again' });
   }
-
   try {
     // Verifica el token
     const decoded = jwt.verify(token, secretKey);
@@ -201,7 +197,6 @@ console.log("secretkey:"+secretKey)
     res.status(401).json({ success: false, message: 'Invalid token. Please login again' });
   }
 }
-
 
 router.get('/',isAuthenticated, getCart);
 router.get('/checkout',isAuthenticated,  checkout);
