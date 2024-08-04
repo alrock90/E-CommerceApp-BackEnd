@@ -34,7 +34,6 @@ const updateUser = async (request, response) => {
   console.log(`id to update ${idUpdate}`);
 
   try {
-    // Actualizar usuario
     const [updatedRows] = await models.Users.update(
       { name: name, email: email, telefon: telefon },
       {
