@@ -80,12 +80,34 @@ const getOrdersById = async (request, response) => {
 };
 
 // Middleware para proteger las rutas
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.SESSION_SECRET_TOKEN || 'yourSecretKey';
+
 function isAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
+  console.log('Cookies recibidas:', req.cookies); // Agrega esta línea para ver todas las cookies recibidas
+console.log("secretkey:"+secretKey)
+  if (!req.cookies) {
+    console.log("Cookies not found. Please login again.");
+    return res.status(401).json({ success: false, message: 'Please login again' });
   }
-  console.log("please relogin")
-  res.status(401).json({ success: false, message: 'Please login again' });
+
+
+  const token = req.cookies.session_token; // Obtén la cookie
+
+  if (!token) {
+    console.log("Token not found. Please login again.");
+    return res.status(401).json({ success: false, message: 'Please login again' });
+  }
+
+  try {
+    // Verifica el token
+    const decoded = jwt.verify(token, secretKey);
+    req.user = decoded; // Guarda los datos decodificados del usuario en `req.user`
+    next();
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    res.status(401).json({ success: false, message: 'Invalid token. Please login again' });
+  }
 }
 
 
