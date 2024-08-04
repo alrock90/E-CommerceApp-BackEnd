@@ -85,7 +85,7 @@ router.post('/login', (req, res, next) => {
       }
       console.log('Usuario autenticado:', user);
       // Generar un token JWT
-      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, secretKey, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name,cartId: user.cartId }, secretKey, { expiresIn: '1h' });
 
       // Configurar la cookie con el token
       res.cookie('session_token', token, {
@@ -121,7 +121,7 @@ router.get('/auth/google/callback', (req, res, next) => {
       }
       console.log('Usuario autenticado:', user);
       // Generar un token JWT
-      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, secretKey, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name, cartId: user.cartId }, secretKey, { expiresIn: '1h' });
 
       // Configurar la cookie con el token
       res.cookie('session_token', token, {

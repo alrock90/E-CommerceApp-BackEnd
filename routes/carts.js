@@ -90,18 +90,18 @@ const checkout = async (request, response) => {
     //new order
     const newOrder = await models.Orders.create({ total: total, userId: request.user.id });
     //copy productos to products_order
-    
+
     for (const item of productInCart) {
-      console.log("item.cart_product?.quantity",item.cart_product?.quantity)
-      console.log("productId",item.id)
-      console.log("orderId",newOrder.id)
+      console.log("item.cart_product?.quantity", item.cart_product?.quantity)
+      console.log("productId", item.id)
+      console.log("orderId", newOrder.id)
       const result = await models.Products_orders.create(
         {
           quantity: item.cart_product?.quantity,
           productId: item.id,
           orderId: newOrder.id
         }
-         //{        where: {cartId: cartId}      }
+        //{        where: {cartId: cartId}      }
       );
     };
     //delete al items en cart
@@ -177,11 +177,11 @@ const secretKey = process.env.SESSION_SECRET_TOKEN || 'yourSecretKey';
 
 function isAuthenticated(req, res, next) {
   console.log('Cookies recibidas:', req.cookies); // Agrega esta línea para ver todas las cookies recibidas
-console.log("secretkey:"+secretKey)
+  console.log("secretkey:" + secretKey)
   if (!req.cookies) {
     console.log("Cookies not found. Please login again.");
     return res.status(401).json({ success: false, message: 'Please login again' });
-  }  
+  }
   const token = req.cookies.session_token; // Obtén la cookie
   if (!token) {
     console.log("Token not found. Please login again.");
@@ -198,11 +198,11 @@ console.log("secretkey:"+secretKey)
   }
 }
 
-router.get('/',isAuthenticated, getCart);
-router.get('/checkout',isAuthenticated,  checkout);
-router.post('/',isAuthenticated, addItem);
+router.get('/', isAuthenticated, getCart);
+router.get('/checkout', isAuthenticated, checkout);
+router.post('/', isAuthenticated, addItem);
 router.put('/', isAuthenticated, updateItem);
-router.delete('/:id',isAuthenticated,  deleteItem);
+router.delete('/:id', isAuthenticated, deleteItem);
 
 
 
