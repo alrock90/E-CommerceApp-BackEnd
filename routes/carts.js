@@ -34,6 +34,48 @@ const addItem = async (request, response) => {
   console.log(request.user);
   const { productId, quantity, cartId } = request.body;
 
+  //check if the article is in the cart
+  try {
+    const [result, created] = await Cart_product.findOrCreate({
+      where: {
+        productId: productId,
+        cartId: cartId
+      },
+      defaults: {
+        quantity: quantity,
+        productId: productId,
+        cartId: cartId
+      },
+    });
+    if (!created) {
+      const addItem = await models.Cart_product.update({
+        quantity: quantity + result.quantity
+      }, {
+        where: {
+          productId: productId,
+          cartId: cartId
+        }
+      });
+    }
+
+    if (result) {
+      // Si se agrega correctamente, devolver el nuevo producto agregado
+      const newProduct = await models.Product.findByPk(productId);
+      response.status(200).json({ success: true, message: 'Product added to cart successfully', products: newProduct });
+    } else {
+      response.status(400).json({ success: false, error: 'Failed to add product to cart' });
+    }
+
+
+
+
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+
+
+
   try {
     const result = await models.Cart_product.create(
       {
@@ -52,6 +94,8 @@ const addItem = async (request, response) => {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
+
+
 };
 
 
@@ -125,6 +169,34 @@ const updateItem = async (request, response) => {
   const cartId = request.user.cartId;
   const { productId, quantity } = request.body;
 
+  // Llama a la función que maneja la actualización del carrito
+  const result = await updateCartItem(quantity, productId, cartId);
+
+  // Manejo de la respuesta HTTP basado en el resultado de la actualización
+  if (result.success) {
+    return response.status(200).send(result.message);
+  } else if (result.message === 'Cart item not found') {
+    return response.status(404).json({ success: false, message: result.message });
+  } else {
+    return response.status(500).json({ success: false, error: result.error });
+  }
+  /*
+    try {
+      const result = await models.Cart_product.update({ quantity: quantity }, {
+        where: {
+          productId: productId,
+          cartId: cartId
+        }
+      });
+      response.status(200).send(`Cart_product updated  `);;
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+      */
+};
+
+async function updateCartItem(quantity, productId, cartId) {
   try {
     const result = await models.Cart_product.update({ quantity: quantity }, {
       where: {
@@ -132,12 +204,16 @@ const updateItem = async (request, response) => {
         cartId: cartId
       }
     });
+    if (result[0] === 0) {
+      return { success: false, message: 'Cart item not found' };
+    }
     response.status(200).send(`Cart_product updated  `);;
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-};
+}
+
 
 const deleteItem = async (request, response) => {
   const cartId = request.user.cartId;
