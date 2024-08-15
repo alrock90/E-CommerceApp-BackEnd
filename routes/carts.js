@@ -3,6 +3,8 @@ const { Router } = require('express');
 const { models } = require('../models');
 const passport = require('passport');
 const router = Router();
+
+const cartNotFound = 'Cart item not found';
 //const stripe = require('stripe')('YOUR_STRIPE_SECRET_KEY');
 
 // Middleware para proteger las rutas con Passport
@@ -34,48 +36,42 @@ const addItem = async (request, response) => {
   console.log(request.user);
   const { productId, quantity, cartId } = request.body;
 
-  //check if the article is in the cart
-  try {
+ 
+  try {  //check if the article is in the cart
     const [result, created] = await Cart_product.findOrCreate({
       where: {
-        productId: productId,
-        cartId: cartId
+        productId: productId, cartId: cartId
       },
       defaults: {
-        quantity: quantity,
-        productId: productId,
-        cartId: cartId
+        quantity: quantity, productId: productId, cartId: cartId
       },
     });
     if (!created) {
-      const addItem = await models.Cart_product.update({
-        quantity: quantity + result.quantity
-      }, {
-        where: {
-          productId: productId,
-          cartId: cartId
-        }
-      });
+      // Llama a la función que maneja la actualización del carrito
+      const updateCart = await updateCartItem(quantity + result.quantity, productId, cartId);
+
+      // Manejo de la respuesta HTTP basado en el resultado de la actualización
+      if (updateCart.success) {
+        return response.status(200).send(updateCart.message);
+      } else if (updateCart.message === cartNotFound) {
+        return response.status(404).json({ success: false, message: updateCart.message });
+      } else {
+        return response.status(500).json({ success: false, error: updateCart.error });
+      }
     }
 
-    if (result) {
+    if (created) {
       // Si se agrega correctamente, devolver el nuevo producto agregado
       const newProduct = await models.Product.findByPk(productId);
       response.status(200).json({ success: true, message: 'Product added to cart successfully', products: newProduct });
     } else {
       response.status(400).json({ success: false, error: 'Failed to add product to cart' });
     }
-
-
-
-
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-
-
-
+/*
   try {
     const result = await models.Cart_product.create(
       {
@@ -94,8 +90,7 @@ const addItem = async (request, response) => {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-
-
+*/
 };
 
 
@@ -175,7 +170,7 @@ const updateItem = async (request, response) => {
   // Manejo de la respuesta HTTP basado en el resultado de la actualización
   if (result.success) {
     return response.status(200).send(result.message);
-  } else if (result.message === 'Cart item not found') {
+  } else if (result.message === cartNotFound) {
     return response.status(404).json({ success: false, message: result.message });
   } else {
     return response.status(500).json({ success: false, error: result.error });
@@ -205,9 +200,10 @@ async function updateCartItem(quantity, productId, cartId) {
       }
     });
     if (result[0] === 0) {
-      return { success: false, message: 'Cart item not found' };
+      return { success: false, message: cartNotFound };
     }
-    response.status(200).send(`Cart_product updated  `);;
+    response.status(200).json({ success: true, message: 'Product updated to cart successfully', 
+      products: {quantity: quantity, productId: productId, cartId: cartId} });
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
