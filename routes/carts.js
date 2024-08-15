@@ -38,7 +38,7 @@ const addItem = async (request, response) => {
 
  
   try {  //check if the article is in the cart
-    const [result, created] = await Cart_product.findOrCreate({
+    const [result, created] = await models.Cart_product.findOrCreate({
       where: {
         productId: productId, cartId: cartId
       },
