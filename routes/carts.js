@@ -36,7 +36,7 @@ const addItem = async (request, response) => {
   console.log(request.user);
   const { productId, quantity, cartId } = request.body;
 
- 
+
   try {  //check if the article is in the cart
     const [result, created] = await models.Cart_product.findOrCreate({
       where: {
@@ -47,16 +47,24 @@ const addItem = async (request, response) => {
       },
     });
     if (!created) {
-      // Llama a la función que maneja la actualización del carrito
-      const updateCart = await updateCartItem(quantity + result.quantity, productId, cartId);
-
-      // Manejo de la respuesta HTTP basado en el resultado de la actualización
-      if (updateCart.success) {
-        return response.status(200).send(updateCart.message);
-      } else if (updateCart.message === cartNotFound) {
-        return response.status(404).json({ success: false, message: updateCart.message });
-      } else {
-        return response.status(500).json({ success: false, error: updateCart.error });
+      const newQuantity = quantity + result.quantity;
+      try {
+        const resultUpdate = await models.Cart_product.update({ quantity: newQuantity }, {
+          where: {
+            productId: productId,
+            cartId: cartId
+          }
+        });
+        if (resultUpdate[0] === 0) {
+          return { success: false, message: cartNotFound };
+        }
+        response.status(200).json({
+          success: true, message: 'Product updated to cart successfully',
+          products: { quantity: newQuantity, productId: productId, cartId: cartId }
+        });
+      } catch (error) {
+        console.error(error);
+        response.status(500).json({ success: false, error: 'Internal Server Error' });
       }
     }
 
@@ -71,26 +79,26 @@ const addItem = async (request, response) => {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
-/*
-  try {
-    const result = await models.Cart_product.create(
-      {
-        quantity: quantity,
-        productId: productId,
-        cartId: cartId
-      });
-    if (result) {
-      // Si se agrega correctamente, devolver el nuevo producto agregado
-      const newProduct = await models.Product.findByPk(productId);
-      response.status(200).json({ success: true, message: 'Product added to cart successfully', products: newProduct });
-    } else {
-      response.status(400).json({ success: false, error: 'Failed to add product to cart' });
+  /*
+    try {
+      const result = await models.Cart_product.create(
+        {
+          quantity: quantity,
+          productId: productId,
+          cartId: cartId
+        });
+      if (result) {
+        // Si se agrega correctamente, devolver el nuevo producto agregado
+        const newProduct = await models.Product.findByPk(productId);
+        response.status(200).json({ success: true, message: 'Product added to cart successfully', products: newProduct });
+      } else {
+        response.status(400).json({ success: false, error: 'Failed to add product to cart' });
+      }
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ success: false, error: 'Internal Server Error' });
     }
-  } catch (error) {
-    console.error(error);
-    response.status(500).json({ success: false, error: 'Internal Server Error' });
-  }
-*/
+  */
 };
 
 
@@ -202,8 +210,10 @@ async function updateCartItem(quantity, productId, cartId) {
     if (result[0] === 0) {
       return { success: false, message: cartNotFound };
     }
-    response.status(200).json({ success: true, message: 'Product updated to cart successfully', 
-      products: {quantity: quantity, productId: productId, cartId: cartId} });
+    response.status(200).json({
+      success: true, message: 'Product updated to cart successfully',
+      products: { quantity: quantity, productId: productId, cartId: cartId }
+    });
   } catch (error) {
     console.error(error);
     response.status(500).json({ success: false, error: 'Internal Server Error' });
