@@ -47,37 +47,42 @@ const addItem = async (request, response) => {
       },
     });
     if (!created) {
+      console.log("item exist in cart, now it will be updated");
       const newQuantity = quantity + result.quantity;
-      try {
-        const resultUpdate = await models.Cart_product.update({ quantity: newQuantity }, {
-          where: {
-            productId: productId,
-            cartId: cartId
-          }
-        });
-        if (resultUpdate[0] === 0) {
-          return { success: false, message: cartNotFound };
-        }
-        response.status(200).json({
-          success: true, message: 'Product updated to cart successfully',
-          products: { quantity: newQuantity, productId: productId, cartId: cartId }
-        });
-      } catch (error) {
-        console.error(error);
-        response.status(500).json({ success: false, error: 'Internal Server Error' });
-      }
-    }
 
-    if (created) {
-      // Si se agrega correctamente, devolver el nuevo producto agregado
-      const newProduct = await models.Product.findByPk(productId);
-      response.status(200).json({ success: true, message: 'Product added to cart successfully', products: newProduct });
+      const resultUpdate = await models.Cart_product.update({ quantity: newQuantity }, {
+        where: {
+          productId: productId,
+          cartId: cartId
+        }
+      });
+      if (resultUpdate[0] === 0) {
+        return response.status(404).json({ success: false, message: cartNotFound });
+      }
+
+      return response.status(200).json({
+        success: true,
+        message: 'Product updated in cart successfully',
+        product: {
+          quantity: newQuantity,
+          productId: productId,
+          cartId: cartId
+        }
+      });
+
     } else {
-      response.status(400).json({ success: false, error: 'Failed to add product to cart' });
+      // Si el producto es nuevo, obtenlo y envíalo como respuesta
+      console.log("item didnt exist in cart, it was created");
+      const newProduct = await models.Product.findByPk(productId);
+      return response.status(200).json({
+        success: true,
+        message: 'Product added to cart successfully',
+        product: newProduct
+      });
     }
   } catch (error) {
     console.error(error);
-    response.status(500).json({ success: false, error: 'Internal Server Error' });
+    return response.status(500).json({ success: false, error: 'Internal Server Error' });
   }
   /*
     try {
