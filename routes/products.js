@@ -5,18 +5,39 @@ const router = Router();
 
 
 const getProduct = async (request, response) => {
-  const { offset = 0, limit = 10 } = request.query;
+  // Extraer y validar los parámetros de consulta
+  const offset = parseInt(request.query.offset, 10) || 0;
+  const limit = parseInt(request.query.limit, 10) || 10;
+
+  // Validar los parámetros para asegurar que sean números positivos
+  if (offset < 0 || limit <= 0) {
+    return response.status(400).json({ error: 'Invalid offset or limit' });
+  }
+
   try {
+    // Obtener los productos con paginación
     const allProduct = await models.Product.findAll({
-      offset: parseInt(offset, 10),  // Asegúrate de convertir a número entero, base numerica 10
-      limit: parseInt(limit, 10),    // Asegúrate de convertir a número entero    
+      offset: offset,
+      limit: limit
     });
-    response.status(200).json(allProduct);
+
+    // Obtener el total de productos para calcular si hay más productos
+    const totalProducts = await models.Product.count();
+    
+    // Determinar si hay más productos
+    const hasMore = (offset + limit) < totalProducts;
+
+    // Enviar la respuesta
+    response.status(200).json({
+      products: allProduct,
+      hasMore: hasMore
+    });
   } catch (error) {
-    console.error("Error getting Product:", error);
+    console.error("Error getting products:", error);
     response.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 const getProductById = async (request, response) => {
