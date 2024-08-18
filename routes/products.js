@@ -5,11 +5,12 @@ const router = Router();
 
 
 const getProduct = async (request, response) => {
-  const { offset = 0, limit = 10 } = request.body;
+  const { offset = 0, limit = 10 } = request.query;
   try {
-    const allProduct = await models.Product.findAll(
-      { offset: offset, limit: limit }
-    );
+    const allProduct = await models.Product.findAll({
+      offset: parseInt(offset, 10),  // Asegúrate de convertir a número entero, base numerica 10
+      limit: parseInt(limit, 10),    // Asegúrate de convertir a número entero    
+    });
     response.status(200).json(allProduct);
   } catch (error) {
     console.error("Error getting Product:", error);
