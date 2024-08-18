@@ -5,13 +5,16 @@ const router = Router();
 
 
 const getProduct = async (req, response) => {
+  const { offset = 0, limit = 10 } = request.body;
   try {
-    const allProduct = await models.Product.findAll();
-    response.status(200).json(allProduct);  
-} catch (error) {
+    const allProduct = await models.Product.findAll(
+      { offset: offset, limit: limit }
+    );
+    response.status(200).json(allProduct);
+  } catch (error) {
     console.error("Error getting Product:", error);
     response.status(500).json({ error: "Internal server error" });
-}
+  }
 };
 
 
@@ -23,7 +26,7 @@ const getProductById = async (request, response) => {
     console.log('Not found!');
   } else {
     response.status(200).json(ProductById);
-  }  
+  }
 };
 
 const getProductByCategory = async (request, response) => {
@@ -38,7 +41,7 @@ const getProductByCategory = async (request, response) => {
     console.log('Not found!');
   } else {
     response.status(200).json(ProductByCategory);
-  }  
+  }
 };
 
 
