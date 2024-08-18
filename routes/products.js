@@ -4,7 +4,7 @@ const { models } = require('../models');
 const router = Router();
 
 
-const getProduct = async (req, response) => {
+const getProduct = async (request, response) => {
   const { offset = 0, limit = 10 } = request.body;
   try {
     const allProduct = await models.Product.findAll(
