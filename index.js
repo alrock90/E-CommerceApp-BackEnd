@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 
 const routes = require('./routes/index'); // Importa las rutas de usuarios desde el directorio routes
-const { sequelize, models } = require('./models');
+const { sequelize } = require('./models');
 const cors = require('cors');
 const session = require("express-session");
 const passport = require("passport");

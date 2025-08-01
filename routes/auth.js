@@ -9,9 +9,10 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.SESSION_SECRET_TOKEN;
-const callbackFrontend = process.env.CALLBACKURLFRONT || 'https://e-commercealrock.onrender.com';
-
+//const callbackFrontend = process.env.CALLBACKURLFRONT || 'https://e-commercealrock.onrender.com';
+const callbackFrontend = process.env.CALLBACKURLFRONT || 'vacio';
 console.log("callbackFrontendtest:" + callbackFrontend)
+console.log("callbackFrontendtest:" + process.env.CALLBACKURLFRONT)
 
 
 

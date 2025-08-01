@@ -4,8 +4,9 @@ const getOrdersModel = require('./orders');
 const getProductModel = require('./product');
 const getCartModel = require('./cart');
 const getCartProductModel = require('./cart_products');
-const getOrderProductModel = require('./products_orders');
+const getProductsOrdersModel = require('./products_orders');
 
+const config = require('../config');
 /*
 const sequelize = new Sequelize(
   process.env.PGDATABASE,
@@ -15,7 +16,8 @@ const sequelize = new Sequelize(
     dialect: 'postgres',
   },
 );
-*/
+
+//
 const sequelize = new Sequelize(process.env.PGURL, {
   dialect: 'postgres',
   protocol: 'postgres',
@@ -25,6 +27,21 @@ const sequelize = new Sequelize(process.env.PGURL, {
   }
 })
 
+*/
+
+
+let sequelize;
+
+if (process.env.NODE_ENV === 'production') {
+  sequelize = new Sequelize(config.DB.url, config.DB);
+} else {
+  sequelize = new Sequelize(
+    config.DB.database,
+    config.DB.username,
+    config.DB.password,
+    config.DB
+  );
+}
 
 
 const models = {
@@ -33,7 +50,7 @@ const models = {
   Product: getProductModel(sequelize, Sequelize),
   Cart: getCartModel(sequelize, Sequelize),
   Cart_product: getCartProductModel(sequelize, Sequelize),
-  Products_orders: getOrderProductModel(sequelize, Sequelize),
+  Products_orders: getProductsOrdersModel(sequelize, Sequelize),
 };
 
 
