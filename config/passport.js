@@ -68,7 +68,8 @@ passport.use(new GoogleStrategy({
         id: profile.id,
         name: profile.displayName,
         email: profile.emails[0].value,
-        cartId: newCart.id
+        cartId: newCart.id,
+        role: 'user'
       });
     }
     return done(null, user);
