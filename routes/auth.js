@@ -17,7 +17,7 @@ console.log("callbackFrontendtest:" + process.env.CALLBACKURLFRONT)
 
 
 const register = async (req, res) => {
-  const { name, email, telefon, password } = req.body;
+  const { name, email, telefon, password, role } = req.body;
 
   try {
     const user = await models.Users.findOne({ where: { email: email } });
@@ -27,16 +27,22 @@ const register = async (req, res) => {
       //return res.redirect("login");
       return res.status(409).json({ success: false, message: 'User already exists' });
     }
+    if (role != 'user' && role != 'store') {
+      role = 'user'
+    }
 
     console.log(`user no existe ${user}`);
     // Hash password before storing in local DB:
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
+    let newCart;
     // Create a new Cart
-    const newCart = await models.Cart.create();
-    console.log("new Cart's auto-generated ID:", JSON.stringify(newCart.id));
-
+    if (role === 'user') {
+       newCart = await models.Cart.create();
+      console.log("new Cart's auto-generated ID:", JSON.stringify(newCart.id));
+    } else{
+       newCart= ''
+    }
     // Create a new user
     try {
       const newUser = await models.Users.create({
@@ -44,12 +50,13 @@ const register = async (req, res) => {
         email: email,
         telefon: telefon,
         password: hashedPassword,
-        cartId: newCart.id
+        cartId: newCart.id,
+        role: role
       });
       console.log("new user's auto-generated ID:", JSON.stringify(newUser.id));
       //res.status(201).send(`User added with ID: ${newUser.id}`);
       //res.status(201).json({ success: true, userId: newUser.id });
-      return res.status(200).json({ success: true, message: 'Login successful', id: newUser.id, name: newUser.name, email: newUser.email, cartId: newUser.cartId });
+      return res.status(200).json({ success: true, message: 'Login successful', id: newUser.id, name: newUser.name, email: newUser.email, cartId: newUser.cartId, role: newUser.role });
 
 
       //res.redirect("login");
@@ -86,7 +93,7 @@ router.post('/login', (req, res, next) => {
       }
       console.log('Usuario autenticado:', user);
       // Generar un token JWT
-      const token = jwt.sign({ id: user.id, email: user.email, name: user.name,cartId: user.cartId }, secretKey, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name, cartId: user.cartId, role: user.role }, secretKey, { expiresIn: '1h' });
 
       // Configurar la cookie con el token
       res.cookie('session_token', token, {
@@ -96,7 +103,7 @@ router.post('/login', (req, res, next) => {
         maxAge: 3600000 // 1 hora
       });
 
-      return res.status(200).json({ success: true, message: 'Login successful', id: user.id, name: user.name, email: user.email, cartId: user.cartId });
+      return res.status(200).json({ success: true, message: 'Login successful', id: user.id, name: user.name, email: user.email, cartId: user.cartId, role: user.role });
     });
   })(req, res, next);
 });
@@ -169,13 +176,13 @@ router.get("/logout", (req, res) => {
       console.error("Error during logout:", err);
       return res.status(500).json({ success: false, message: "Logout failed" });
     }
-      // Clear the session_token cookie by setting it to an expired date
-      res.clearCookie('session_token', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'None'
-      });
-  
+    // Clear the session_token cookie by setting it to an expired date
+    res.clearCookie('session_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None'
+    });
+
 
     res.status(200).json({ success: true, message: "Logout successful" });
   });

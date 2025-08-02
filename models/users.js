@@ -42,6 +42,14 @@ const getUsersModel = (sequelize, { DataTypes }) => {
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL',
     },
+     role: {
+      type: DataTypes.STRING,
+      unique: false,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
     // googleId: {
     //   type: DataTypes.STRING,
     //   unique: true,
